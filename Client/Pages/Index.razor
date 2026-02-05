@@ -1,0 +1,218 @@
+@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using StockManagementSystem.Shared.Models
+@using StockManagementSystem.Client.Services
+@inject StockService StockService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+<PageTitle>Dashboard - Stock Management</PageTitle>
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>Stock Dashboard</h2>
+            <p class="text-muted">Welcome, <strong>@username</strong>!</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <button class="btn btn-success me-2" @onclick="NavigateToManage">
+                        <i class="bi bi-gear"></i> Manage Stock
+                    </button>
+                </Authorized>
+            </AuthorizeView>
+            <button class="btn btn-danger" @onclick="Logout">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" placeholder="Search by item name..." 
+                       @bind="searchTerm" @bind:event="oninput" @onkeyup="SearchStock" />
+                <button class="btn btn-primary" @onclick="SearchStock">
+                    Search
+                </button>
+                @if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    <button class="btn btn-secondary" @onclick="ClearSearch">
+                        Clear
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading stock data...</p>
+        </div>
+    }
+    else if (stockItems == null || !stockItems.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No stock items found.
+        </div>
+    }
+    else
+    {
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-box-seam"></i> Total Items</h5>
+                        <h2 class="display-4">@stockItems.Count</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-stack"></i> Total Quantity</h5>
+                        <h2 class="display-4">@stockItems.Sum(s => s.Quantity)</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-exclamation-triangle"></i> Low Stock Items</h5>
+                        <h2 class="display-4">@stockItems.Count(s => s.Quantity < 50)</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-table"></i> Stock Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>S.No</th>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Created By</th>
+                                <th>Created Date</th>
+                                <th>Updated By</th>
+                                <th>Updated Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in stockItems)
+                            {
+                                <tr>
+                                    <td>@item.SNo</td>
+                                    <td><strong>@item.ItemName</strong></td>
+                                    <td>
+                                        <span class="badge @GetQuantityBadgeClass(item.Quantity)">
+                                            @item.Quantity
+                                        </span>
+                                    </td>
+                                    <td>@item.CreatedBy</td>
+                                    <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                    <td>@(item.UpdatedBy ?? "-")</td>
+                                    <td>@(item.UpdatedDate?.ToString("yyyy-MM-dd HH:mm") ?? "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<StockItem> stockItems = new();
+    private string searchTerm = string.Empty;
+    private bool isLoading = true;
+    private string username = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        username = await AuthService.GetUsername() ?? "User";
+        await LoadStockItems();
+    }
+
+    private async Task LoadStockItems()
+    {
+        isLoading = true;
+        try
+        {
+            stockItems = await StockService.GetAllStockItems();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading stock items: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SearchStock()
+    {
+        isLoading = true;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                await LoadStockItems();
+            }
+            else
+            {
+                stockItems = await StockService.SearchStockItems(searchTerm);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error searching stock items: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ClearSearch()
+    {
+        searchTerm = string.Empty;
+        await LoadStockItems();
+    }
+
+    private string GetQuantityBadgeClass(int quantity)
+    {
+        if (quantity == 0) return "bg-danger";
+        if (quantity < 50) return "bg-warning text-dark";
+        return "bg-success";
+    }
+
+    public void NavigateToManage()
+    {
+        Navigation.NavigateTo("/manage");
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.Logout();
+        Navigation.NavigateTo("/login");
+        StateHasChanged();
+    }
+}
