@@ -1,0 +1,11 @@
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\bin\Debug\net8.0\StockManagementSystem.Shared.deps.json
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\bin\Debug\net8.0\StockManagementSystem.Shared.dll
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\bin\Debug\net8.0\StockManagementSystem.Shared.pdb
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\obj\Debug\net8.0\StockManagementSystem.Shared.GeneratedMSBuildEditorConfig.editorconfig
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\obj\Debug\net8.0\StockManagementSystem.Shared.AssemblyInfoInputs.cache
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\obj\Debug\net8.0\StockManagementSystem.Shared.AssemblyInfo.cs
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\obj\Debug\net8.0\StockManagementSystem.Shared.csproj.CoreCompileInputs.cache
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\obj\Debug\net8.0\StockManagementSystem.Shared.dll
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\obj\Debug\net8.0\refint\StockManagementSystem.Shared.dll
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\obj\Debug\net8.0\StockManagementSystem.Shared.pdb
+F:\Project-NS\StockManagementSystem\StockManagementSystem\Shared\obj\Debug\net8.0\ref\StockManagementSystem.Shared.dll
